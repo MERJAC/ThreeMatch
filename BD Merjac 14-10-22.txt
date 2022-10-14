@@ -1,0 +1,298 @@
+
+use merjac;
+
+
+create table tipos_resultados(
+id serial,
+nombre varchar(20) not null,
+primary key(Id)
+);
+create table deportes(
+id serial,
+tipo bigint unsigned not null,
+nombre varchar(20) not null,
+primary key(id),
+foreign key (tipo) references tipos_resultados(id)
+);
+create table individual(
+deporte bigint unsigned not null,
+primary key(deporte),
+foreign key (deporte) references deportes(id)
+);
+create table grupal(
+deporte bigint unsigned not null,
+cantidad_jugador_plantel int  not null,
+primary key(deporte),
+foreign key (deporte) references deportes(id)
+);
+create table eventos(
+id serial,
+deporte bigint unsigned not null,
+titulo varchar(70) not null,
+fecha_Inicio datetime not null,
+lugar varchar(40) not null,
+nombre_arbitro varchar(30) not null,
+primary key(id, deporte),
+foreign key (deporte) references deportes(id)
+);
+create table tipos_usuarios(
+id serial,
+nombre varchar(20) not null,
+primary key(Id)
+);
+
+/*create table users(
+id serial,
+email varchar(40) not null,
+name varchar(30) not null,
+password varchar(30) not null,
+primary key(id),
+);*/
+
+ALTER TABLE users
+ADD CONSTRAINT
+foreign key (tipo) references tipos_usuarios(id)
+;
+
+
+create table se_suscribe(
+usuario bigint unsigned not null,
+evento bigint unsigned not null,
+primary key(usuario, evento),
+foreign key (usuario) references users(id),
+foreign key (evento) references eventos(id)
+);
+create table equipos(
+id serial,
+nombre_equipo varchar(20) not null,
+nombre_DT  varchar(20) not null,
+primary key(id)
+);
+create table eventos_visitante(
+evento bigint unsigned not null,
+equipo bigint unsigned not null,
+primary key(evento),
+foreign key (evento) references eventos(id),
+foreign key (equipo) references equipos(id)
+);
+create table eventos_local(
+evento bigint unsigned not null,
+equipo bigint unsigned not null,
+primary key(evento),
+foreign key (evento) references eventos(id),
+foreign key (equipo) references equipos(id)
+);
+create table estadisticas(
+id serial,
+nombre varchar(20) not null,
+primary key(id)
+);
+create table estadisticas_eventos_visitante(
+estadistica bigint unsigned not null,
+equipo bigint unsigned not null,
+evento bigint unsigned not null,
+puntaje int not null,
+primary key(estadistica, evento),
+foreign key (estadistica) references estadisticas(id),
+foreign key (evento) references eventos_visitante(evento)
+);
+create table estadisticas_eventos_local(
+estadistica bigint unsigned not null,
+equipo bigint unsigned not null,
+evento bigint unsigned not null,
+puntaje int not null,
+primary key(estadistica, evento),
+foreign key (estadistica) references estadisticas(id),
+foreign key (evento) references eventos_local(evento)
+);
+create table jugadores(
+id serial,
+nombre_completo varchar(30) not null,
+n_camiseta int not null,
+posicion varchar(30) not null,
+primary key(id)
+);
+create table jugadores_equipos(
+jugador bigint unsigned not null,
+equipo bigint unsigned not null,
+primary key(jugador, equipo),
+foreign key(jugador) references jugadores(id),
+foreign key(equipo) references equipos(id)
+);
+create table eventos_Jugadores_equipos(
+jugador bigint unsigned not null,
+equipo bigint unsigned not null,
+evento bigint unsigned not null,
+primary key(jugador, equipo, evento),
+foreign key (jugador, equipo) references jugadores_equipos(jugador, equipo),
+foreign key (evento) references eventos(id)
+);
+create table infracciones(
+id serial,
+nombre varchar(20),
+primary key(id)
+);
+create table jugadores_infracciones(
+jugador bigint unsigned not null,
+equipo bigint unsigned not null,
+evento bigint unsigned not null,
+infraccion bigint unsigned not null,
+cantidad int not null,
+primary key(jugador, equipo, evento, infraccion),
+foreign key (jugador, equipo, evento) references eventos_jugadores_equipos(jugador, equipo, evento),
+foreign key (infraccion) references infracciones(id)
+);
+create table puntajes(
+id serial,
+evento bigint unsigned not null,
+primary key(id),
+foreign key (evento) references eventos(id)
+);
+create table por_marca(
+puntaje bigint unsigned not null,
+primary key(puntaje),
+foreign key (puntaje) references puntajes(id)
+);
+create table jugadores_marca(
+puntaje bigint unsigned not null,
+jugador bigint unsigned not null,
+equipo bigint unsigned not null,
+evento bigint unsigned not null,
+marca int not null,
+primary key(puntaje),
+foreign key (puntaje) references Por_Marca(puntaje),
+foreign key (jugador, equipo, evento) references eventos_jugadores_equipos(jugador, equipo, evento)
+);
+create table sets(
+puntaje bigint unsigned not null,
+primary key(puntaje),
+foreign key (puntaje) references puntajes(id)
+);
+create table aset(
+n_set serial,
+puntaje bigint unsigned not null,
+puntos_local int not null,
+puntos_visitante int not null,
+primary key(n_set, puntaje),
+foreign key (puntaje) references sets(puntaje)
+);
+create table puntos(
+puntaje bigint unsigned,
+puntos_local int not null,
+puntos_visitante int not null,
+primary key(puntaje),
+foreign key (puntaje) references puntajes(id)
+);
+create table torneos(
+id serial,
+nombre varchar(40) not null,
+primary key(id)
+);
+create table eventos_torneos(
+evento bigint unsigned,
+torneo bigint unsigned,
+nombre varchar(70) not null,
+primary key(evento),
+foreign key (evento) references eventos(id),
+foreign key (torneo) references torneos(id)
+);
+
+
+/*--------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------*/
+
+
+INSERT INTO tipos_resultados (nombre) VALUES 
+('Puntos'),
+('Por_Marcas'),
+('Sets');
+INSERT INTO deportes (tipo, nombre) VALUES 
+(1, 'Futbol'),
+(3, 'Tenis');
+INSERT INTO grupal (deporte, cantidad_jugador_plantel) VALUES 
+(1, 11);
+INSERT INTO individual (deporte) VALUES 
+(2);
+INSERT INTO eventos (deporte, titulo, lugar, fecha_inicio, nombre_arbitro) VALUES 
+(1, 'Uruguay vs Argentina', 'Estadio Centenario', '2022-08-25 03:00', 'Mirtha Legrand'),
+(1, 'Nacional vs Peñarol', 'Estadio Campeon del Siglo', '2022-08-25 03:00', 'Pepe Mujica'),
+(1, 'Aguada vs Wanders', 'Estadio Centenario', '2022-08-25 03:00', 'Benito Camelo'),
+(2, 'Pepe vs Mirtha', 'Parque Rodo', '2022-08-25 03:00', 'Yao Cabrera'),
+(2, 'Agustin Casanova vs El Gordo Verde', 'Parque Rodo', '2022-08-25 03:00', 'Jorge Puglia');
+INSERT INTO tipos_usuarios (nombre) VALUES 
+('Usuario'),
+('Usuario_Premium');
+/*INSERT INTO se_suscribe (usuario, evento) VALUES 
+(1, 1), (1, 2), (1, 3), (1, 5), 
+(2, 3), (2, 4), (2, 1), (3, 2);*/
+INSERT INTO equipos (nombre_equipo, nombre_dt) VALUES 
+('Uruguay', 'Diego Alonzo'),
+('Argentina', 'Lionel Scaloni'),
+('Nacional', 'Pablo Repetto'),
+('Peñarol', 'Leonardo Ramos');
+INSERT INTO eventos_visitante (evento, equipo) VALUES 
+(1, 2),
+(2, 4);
+INSERT INTO eventos_local (evento, equipo) VALUES 
+(1, 1),
+(2, 3);
+INSERT INTO estadisticas (nombre) VALUES 
+('Faltas'),
+('Tiro de esquina'),
+('Pases'),
+('Tarjeta Roja'),
+('Tarjeta Amarilla'),
+('Posicion Adelantada');
+INSERT INTO estadisticas_eventos_visitante (estadistica, evento, equipo, puntaje) VALUES 
+(1, 1, 2, 14), (2, 1, 2, 2), (3, 1, 2, 586), 
+(4, 1, 2, 0), (5, 1, 2, 1), (6, 1, 2, 1); 
+INSERT INTO estadisticas_eventos_local (estadistica, evento, equipo, puntaje) VALUES 
+(1, 1, 1, 20), (2, 1, 1, 7), (3, 1, 1, 302), 
+(4, 1, 1, 0), (5, 1, 1, 1), (6, 1, 1, 2);
+INSERT INTO jugadores(nombre_completo, n_camiseta, posicion) VALUES 
+('Fernando Muslera', 1, 'Arquero'),
+('José María Giménez', 2, 'Defensa'),
+('Diego Godín', 3, 'Defensa'),
+('Ronald Araújo', 4, 'Defensa'),
+('Matías Vecino', 5, 'Mediocentro'),
+('Manuel Ugarte', 6, 'Pivote'),
+('Diego Rossi', 8, 'Extremo izquierdo'),
+('Facundo Pellistri', 8, 'Extremo derecho'),
+('Giorgian de Arrascaeta', 10, 'Mediocentro'),
+('Sergio Rochet', 12, 'Arquero'),
+('Lucas Torreira', 14, 'Pivote'),
+('Federico Valverde', 15, 'Mediocentro'),
+('Maxi Gómez', 18, 'Delantero'),
+('Sebastián Coates', 19, 'Defensa'),
+('Edinson Cavani', 21, 'Delantero'),
+('Luiz Suarez', 9, 'Delantero');
+INSERT INTO jugadores_equipos (jugador, equipo) VALUES
+(1,1), (2,1), (3,1), (4,1), (5,1), (6,1), 
+(7,1), (8,1), (9,1), (10,1), (11,1), (12,1), 
+(13,1), (14,1), (15,1), (16,1);
+INSERT INTO eventos_jugadores_equipos (jugador, equipo, evento) VALUES
+(1,1,1), (2,1,1), (3,1,1), (4,1,1), 
+(5,1,1), (6,1,1), (7,1,1), (8,1,1), (9,1,1), 
+(10,1,1), (11,1,1), (12,1,1), (13,1,1), 
+(14,1,1), (15,1,1), (16,1,1); 
+INSERT INTO infracciones (Nombre) VALUES 
+('Tarjeta Amarilla'),
+('Tarjeta Roja'),
+('Falta');
+INSERT INTO jugadores_infracciones (jugador, equipo, evento, infraccion, cantidad) VALUES
+(4,1,1,1,1),
+(15,1,1,1,1),
+(8,1,1,2,1);
+INSERT INTO puntajes (evento) VALUES
+(1),
+(2),
+(3);
+INSERT INTO puntos (puntaje, puntos_Local, puntos_visitante) VALUES
+(1,3,1),
+(2,2,0);
+INSERT INTO sets (puntaje) VALUES
+(3);
+INSERT INTO aset (puntaje, puntos_local, puntos_visitante) VALUES
+(3,1,3);
